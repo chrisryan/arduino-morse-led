@@ -1,15 +1,20 @@
 /*
-  Blink
-  Turns on an LED on for one second, then off for one second, repeatedly.
- 
-  This example code is in the public domain.
+ * Morse LED
+ * Turns on an LED on/off using morse code to communicate a message.
+ *
+ * Licensed under MIT
  */
- 
+
 // Pin 13 has an LED connected on most Arduino boards.
 // give it a name:
 int led = 13;
+
+// number of milliseconds that a pulse is for displaying the morse code
+// a dot is one pulse in time.
 int pulse = 100;
 
+// the message you want to display
+// must be A-Z and space
 char message[] = "ARDUINO IN MORSE";
 
 // Store the morse code letters in 5 byte increments
@@ -62,11 +67,12 @@ int dotdash[] = {
 };
 #define MAXDOTDASH (sizeof(dotdash)/sizeof(int))
 
-// the setup routine runs once when you press reset:
 void setup() {                
   // initialize the digital pin as an output.
   pinMode(led, OUTPUT);
 
+  // DEBUG: at startup blink out the morse signal for 5
+  //        which is 5 dot's and easy to understand.
   morse('5');
   endword(); 
 }
@@ -77,6 +83,7 @@ void loop() {
     morse(message[i]);
     space();
   }
+  
   endword();
 }
 
@@ -87,7 +94,7 @@ void morse(char letter) {
 
   int index = (letter - '0') * 5;
   if (index < 0 || index >= MAXDOTDASH) {
-    return;
+    return; // ignore any input that is outside out range
   }
 
   for(int i = index; i < index + 5; i++) {
@@ -97,14 +104,8 @@ void morse(char letter) {
   }
 }
 
-void dot() {
-  glow(1);
-}
-
-void dash() {
-  glow(3);
-}
-
+// Light the LED for the specified pulse width and then wait for 1 pulse
+// A dot is 1 pulse long, a dash is 3 pulses long.
 void glow(int width) {
   digitalWrite(led, HIGH);
   delay(pulse * width);
@@ -112,10 +113,14 @@ void glow(int width) {
   delay(pulse * 1);
 }
 
+// A space is 3 pulses long but all dots/dashes are followed by
+// a single pulse already so we only need the difference.
 void space() {
   delay(pulse * 2);
 }
 
+// An endword is 7 pulses long but all character sequences are
+// followed by a space so we only need the difference.
 void endword() {
   delay(pulse * 4);
 }

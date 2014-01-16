@@ -15,7 +15,7 @@ int pulse = 100;
 
 // the message you want to display
 // must be A-Z and space
-char message[] = "ARDUINO IN MORSE";
+char message[] = "Arduino In Morse";
 
 // Store the morse code letters in 5 byte increments
 // 1 is a dot, 3 is a dash, 0 is no char
@@ -92,6 +92,8 @@ void morse(char letter) {
      return endword();
   }
 
+  letter = toupper(letter);
+  
   int index = (letter - '0') * 5;
   if (index < 0 || index >= MAXDOTDASH) {
     return; // ignore any input that is outside out range

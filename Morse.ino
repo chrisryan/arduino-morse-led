@@ -1,13 +1,37 @@
 /*
  * Morse LED
  * Turns on an LED on/off using morse code to communicate a message.
+ * Will also use the tone function to output sound if you use a speaker.
  *
  * Licensed under MIT
+ */
+
+/*
+ * If you want to have sound then you will need to connect the speaker as follows:
+ *
+ *     GND ---[ speaker ]--- [Resistor 100 ohm] --- Digital_8
+ *
+ * You can also attach a potentiometer to make the note use variable as follows:
+ *
+ *     V5 ----[POT]---- GND
+ *              |
+ *           Analog 0
  */
 
 // Pin 13 has an LED connected on most Arduino boards.
 // give it a name:
 int led = 13;
+
+// do we want to play a sound?
+bool sound = true;
+// Pin 8 is for the speaker
+int speaker = 8;
+int note = 698; // G5 Note as the default
+
+// Do we want to read the tone from an input?
+bool variableNote = false;
+// Analog Pin 0 to read tone from
+int noteIn = 0;
 
 // number of milliseconds that a pulse is for displaying the morse code
 // a dot is one pulse in time.
@@ -67,14 +91,14 @@ int dotdash[] = {
 };
 #define MAXDOTDASH (sizeof(dotdash)/sizeof(int))
 
-void setup() {                
+void setup() {
   // initialize the digital pin as an output.
   pinMode(led, OUTPUT);
 
   // DEBUG: at startup blink out the morse signal for 5
   //        which is 5 dot's and easy to understand.
   morse('5');
-  endword(); 
+  endword();
 }
 
 // the loop routine runs over and over again forever:
@@ -83,7 +107,7 @@ void loop() {
     morse(message[i]);
     space();
   }
-  
+
   endword();
 }
 
@@ -92,8 +116,11 @@ void morse(char letter) {
      return endword();
   }
 
+  // Read note here so the character sounded is all one note.
+  readNote();
+
   letter = toupper(letter);
-  
+
   int index = (letter - '0') * 5;
   if (index < 0 || index >= MAXDOTDASH) {
     return; // ignore any input that is outside out range
@@ -106,12 +133,28 @@ void morse(char letter) {
   }
 }
 
+// Read the note from an input if we are configured to
+void readNote() {
+  if(variableNote) {
+    note = analogRead(noteIn);
+  }
+}
+
 // Light the LED for the specified pulse width and then wait for 1 pulse
 // A dot is 1 pulse long, a dash is 3 pulses long.
 void glow(int width) {
   digitalWrite(led, HIGH);
+  if(sound) {
+    tone(speaker, note);
+  }
+
   delay(pulse * width);
+
   digitalWrite(led, LOW);
+  if (sound) {
+    noTone(speaker);
+  }
+
   delay(pulse * 1);
 }
 
